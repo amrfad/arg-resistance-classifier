@@ -13,7 +13,7 @@ A machine learning-based antibiotic resistance prediction system using k-mer fea
 
 ## 🔬 Overview
 
-This project implements a multi-label classification system for predicting antibiotic resistance genes (ARGs) from DNA sequences. The system uses canonical k-mer features and a neural network architecture to classify sequences into 11 different antibiotic resistance categories.
+This project implements a multi-label classification system for predicting antibiotic resistance from ARG (antibiotic resistance gene) sequences. The system uses canonical k-mer features and a neural network architecture to classify sequences into 11 different antibiotic resistance categories.
 > ⚠️ **Note**: This project is a **proof-of-concept** intended to demonstrate the feasibility of ARG classification using bag-of-kmers method and neural networks. It is not designed for clinical or diagnostic use.
 
 ### Key Features
