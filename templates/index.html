@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediksi Resistensi Antibiotik</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 20px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .result-card {
+            margin-top: 20px;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .resistance-badge {
+            font-size: 0.9em;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .resistant {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .susceptible {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+        }
+        
+        .progress-bar {
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3em;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+        
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background-color: #f0f4ff;
+        }
+        
+        .sequence-info {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .analysis-info {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .antibiotic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .antibiotic-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .antibiotic-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-content {
+            margin-top: 20px;
+        }
+        
+        .nav-tabs .nav-link {
+            border-radius: 10px 10px 0 0;
+            border: none;
+            color: #667eea;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="card">
+            <div class="card-header text-center">
+                <h2><i class="fas fa-dna me-2"></i>Aplikasi Prediksi Resistensi Antibiotik</h2>
+                <p class="mb-0">Prediksi resistensi antibiotik dari sekuens DNA genom bakteri</p>
+            </div>
+            <div class="card-body">
+                <div class="info-box">
+                    <h6><i class="fas fa-info-circle me-2"></i>Informasi Tipe Sekuens:</h6>
+                    <ul class="mb-0">
+                        <li><strong>ARG:</strong> Sekuens gen resistensi antibiotik yang sudah diidentifikasi</li>
+                        <li>
+                            <strong>Other Sequences:</strong> Sekuens genom lengkap atau fragmen genom lainnya (akan dianalisis menggunakan sliding window)
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Tabs -->
+                <ul class="nav nav-tabs" id="inputTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-input" type="button" role="tab">
+                            <i class="fas fa-keyboard me-2"></i>Input Teks
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="file-tab" data-bs-toggle="tab" data-bs-target="#file-input" type="button" role="tab">
+                            <i class="fas fa-file-upload me-2"></i>Upload File
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="inputTabsContent">
+                    <!-- Text Input Tab -->
+                    <div class="tab-pane fade show active" id="text-input" role="tabpanel">
+                        <form id="textForm">
+                            <div class="mb-3">
+                                <label for="sequenceType" class="form-label">
+                                    <i class="fas fa-dna me-2"></i>Tipe Sekuens
+                                </label>
+                                <select class="form-select" id="sequenceType" required>
+                                    <option value="ARG">ARG (Antibiotic Resistance Gene)</option>
+                                    <option value="Other">Other Sequences</option>
+                                </select>
+                                <div id="experimentalWarning" class="alert alert-warning mt-2" style="display: none; font-size: 0.9em;">
+                                    <strong>⚠ Eksperimental:</strong> Analisis ini menggunakan <em>sliding window</em> dan <code>union</code> untuk menghindari <em>false negative</em>,
+                                    namun berpotensi <strong>false positive</strong>.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="sequence" class="form-label">
+                                    <i class="fas fa-code me-2"></i>Sekuens DNA
+                                </label>
+                                <textarea class="form-control" id="sequence" rows="6" placeholder="Masukkan sekuens DNA (format FASTA atau plain text)..." required></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Prediksi Resistensi
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- File Input Tab -->
+                    <div class="tab-pane fade" id="file-input" role="tabpanel">
+                        <form id="fileForm">
+                            <div class="mb-3">
+                                <label for="fileSequenceType" class="form-label">
+                                    <i class="fas fa-dna me-2"></i>Tipe Sekuens
+                                </label>
+                                <select class="form-select" id="fileSequenceType" required>
+                                    <option value="ARG">ARG (Antibiotic Resistance Gene)</option>
+                                    <option value="Other">Other Sequences</option>
+                                </select>
+                                <div id="fileExperimentalWarning" class="alert alert-warning mt-2" style="display: none; font-size: 0.9em;">
+                                    <strong>⚠ Eksperimental:</strong> Analisis ini menggunakan <em>sliding window</em> dan <code>union</code> untuk menghindari <em>false negative</em>,
+                                    namun berpotensi <strong>false positive</strong>.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-file-upload me-2"></i>Upload File Sekuens
+                                </label>
+                                <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                    <p class="mb-0">Klik untuk memilih file atau drag & drop</p>
+                                    <small class="text-muted">Format: .fasta, .fa, .txt</small>
+                                </div>
+                                <input type="file" id="fileInput" accept=".fasta,.fa,.txt" style="display: none;">
+                                <div id="fileInfo" class="mt-2" style="display: none;">
+                                    <small class="text-muted">File terpilih: <span id="fileName"></span></small>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Prediksi Resistensi
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Loading -->
+                <div class="loading" id="loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Memproses prediksi...</p>
+                </div>
+                
+                <!-- Results -->
+                <div id="results" style="display: none;">
+                    <div class="result-card">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-chart-bar me-2"></i>Hasil Prediksi</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="sequence-info" id="sequenceInfo">
+                                    <!-- Sequence info will be populated here -->
+                                </div>
+                                
+                                <div id="analysisInfo" style="display: none;">
+                                    <!-- Analysis info will be populated here -->
+                                </div>
+                                
+                                <div class="antibiotic-grid" id="antibioticResults">
+                                    <!-- Results will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Error Alert -->
+                <div id="errorAlert" class="alert alert-danger" style="display: none;">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="errorMessage"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Setup event listeners on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+        });
+        
+        function setupEventListeners() {
+            // Handle file selection
+            document.getElementById('fileInput').addEventListener('change', function() {
+                const fileInfo = document.getElementById('fileInfo');
+                const fileName = document.getElementById('fileName');
+                
+                if (this.files.length > 0) {
+                    fileName.textContent = this.files[0].name;
+                    fileInfo.style.display = 'block';
+                } else {
+                    fileInfo.style.display = 'none';
+                }
+            });
+            
+            // Handle drag and drop
+            const fileUploadArea = document.querySelector('.file-upload-area');
+            
+            fileUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            
+            fileUploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+            
+            fileUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    document.getElementById('fileInput').files = files;
+                    document.getElementById('fileInput').dispatchEvent(new Event('change'));
+                }
+            });
+            
+            // Handle form submissions
+            document.getElementById('textForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitTextPrediction();
+            });
+            
+            document.getElementById('fileForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitFilePrediction();
+            });
+        }
+        
+        function submitTextPrediction() {
+            const sequenceType = document.getElementById('sequenceType').value;
+            const sequence = document.getElementById('sequence').value.trim();
+            
+            if (!sequence) {
+                showError('Silakan masukkan sekuens DNA');
+                return;
+            }
+            
+            const data = {
+                sequence_type: sequenceType,
+                sequence: sequence
+            };
+            
+            submitPrediction(data);
+        }
+        
+        function submitFilePrediction() {
+            const sequenceType = document.getElementById('fileSequenceType').value;
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!fileInput.files.length) {
+                showError('Silakan pilih file');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('sequence_type', sequenceType);
+            
+            submitFilePrediction_API(formData);
+        }
+        
+        function submitPrediction(data) {
+            showLoading();
+            
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    showResults(data);
+                } else {
+                    showError(data.error || 'Terjadi kesalahan');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showError('Terjadi kesalahan koneksi');
+            });
+        }
+        
+        function submitFilePrediction_API(formData) {
+            showLoading();
+            
+            fetch('/predict_file', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    showResults(data);
+                } else {
+                    showError(data.error || 'Terjadi kesalahan');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showError('Terjadi kesalahan koneksi');
+            });
+        }
+        
+        function showResults(data) {
+            document.getElementById('errorAlert').style.display = 'none';
+            
+            // Populate sequence info
+            const sequenceInfo = document.getElementById('sequenceInfo');
+            sequenceInfo.innerHTML = `
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong><i class="fas fa-dna me-2"></i>Tipe Sekuens:</strong><br>
+                        <span class="badge bg-primary">${data.sequence_type}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong><i class="fas fa-ruler me-2"></i>Panjang Sekuens:</strong><br>
+                        <span class="text-primary">${data.sequence_length.toLocaleString()} bp</span>
+                    </div>
+                    ${data.species ? `
+                    <div class="col-md-3">
+                        <strong><i class="fas fa-microscope me-2"></i>Spesies:</strong><br>
+                        <span class="text-info">${data.species}</span>
+                    </div>
+                    ` : ''}
+                    ${data.filename ? `
+                    <div class="col-md-3">
+                        <strong><i class="fas fa-file me-2"></i>File:</strong><br>
+                        <span class="text-muted">${data.filename}</span>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Populate antibiotic results
+            const antibioticResults = document.getElementById('antibioticResults');
+            antibioticResults.innerHTML = '';
+            
+            const antibiotics = Object.keys(data.predictions);
+            antibiotics.forEach(antibiotic => {
+                const result = data.predictions[antibiotic];
+                const isResistant = result.prediction === 'Resistant';
+                
+                const antibioticItem = document.createElement('div');
+                antibioticItem.className = 'antibiotic-item';
+                antibioticItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0 text-capitalize">${antibiotic.replace('_', ' ')}</h6>
+                        <span class="resistance-badge ${isResistant ? 'resistant' : 'susceptible'}">
+                            ${result.prediction}
+                        </span>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted">Probabilitas: ${(result.probability * 100).toFixed(1)}%</small>
+                        <div class="progress">
+                            <div class="progress-bar ${isResistant ? 'bg-danger' : 'bg-success'}" 
+                                 role="progressbar" 
+                                 style="width: ${result.probability * 100}%">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">Confidence:</small>
+                        <small class="text-muted">${(result.confidence * 100).toFixed(1)}%</small>
+                    </div>
+                `;
+
+                const reliableLabels = [
+                    'carbapenem',
+                    'cephalosporin',
+                    'monobactam',
+                    'penicillin beta-lactam'
+                ];
+
+                if (!reliableLabels.includes(antibiotic)) {
+                    // Tambahkan ikon warning kecil dengan tooltip
+                    const warningIcon = document.createElement('span');
+                    warningIcon.className = 'ms-2 text-warning';
+                    warningIcon.setAttribute('data-bs-toggle', 'tooltip');
+                    warningIcon.setAttribute('data-bs-placement', 'top');
+                    warningIcon.setAttribute('title',
+                        'Hasil ini berasal dari label dengan performa F2-score yang rendah. Tetap boleh dipertimbangkan, namun interpretasikan dengan hati-hati.'
+                    );
+                    warningIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+
+                    // Sisipkan ke dalam heading antibiotik
+                    const heading = antibioticItem.querySelector('h6');
+                    heading.appendChild(warningIcon);
+                }
+                
+                antibioticResults.appendChild(antibioticItem);
+
+                const tooltipTriggerList = antibioticItem.querySelectorAll('[data-bs-toggle="tooltip"]');
+                tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+            });
+            
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('errorAlert').style.display = 'none';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorAlert').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('errorAlert').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Tampilkan peringatan eksperimental saat 'Other Sequences' dipilih
+        document.getElementById('sequenceType').addEventListener('change', function() {
+            const warning = document.getElementById('experimentalWarning');
+            warning.style.display = (this.value === 'Other') ? 'block' : 'none';
+        });
+
+        document.getElementById('fileSequenceType').addEventListener('change', function() {
+            const warning = document.getElementById('fileExperimentalWarning');
+            warning.style.display = (this.value === 'Other') ? 'block' : 'none';
+        });
+
+    </script>
+</body>
+</html>
